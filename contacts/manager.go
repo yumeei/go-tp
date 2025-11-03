@@ -34,17 +34,12 @@ func (m *Manager) SupprimerContact() {
 func (m *Manager) ModifierContact(id uint, c Contact) (Contact, error) {
 	fmt.Printf("Tentative de modification Id : %v\n", id)
 
-	// 1. Vérifier si l'ID existe dans la map
-	// La syntaxe "_, exists" est la façon idiomatique de vérifier
-	// l'existence d'une clé dans une map.
 	_, exists := m.list[id]
 
 	if !exists {
-		// Si l'ID n'existe pas, on ne peut pas modifier, on retourne une erreur
 		return Contact{}, errors.New(fmt.Sprintf("Contact avec ID %d non trouvé", id))
 	}
 
-	// 2. Si l'ID existe, on le modifie
 	m.list[id] = c
 	return c, nil
 
