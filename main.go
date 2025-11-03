@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/yumeei/go-tp/contacts"
@@ -66,16 +67,33 @@ func main() {
 			fmt.Println("-> Supprimer un contact")
 		case "4":
 			fmt.Println("-> Mettre à jour un contact")
-			updateContact := contacts.Contact{
-				Nom:    "test",
-				Prenom: "test",
-				Email:  "test",
-			}
-			updateContact, error2 := contactManager.ModifierContact(0, updateContact)
-			if error2 != nil {
-				fmt.Printf("Une erreur est survenue: %v\n\n", error2)
+			fmt.Println("-> Rentrez l'ID")
+			inputId, _ := reader.ReadString('\n')
+			inputId = strings.TrimSpace(inputId)
+			inputIdInt, err := strconv.ParseInt(inputId, 10, 64)
+			if err != nil {
+				fmt.Printf("Erreur dans la conversion de l'ID %v", err)
 			} else {
-				fmt.Printf("Utilisateur modifié: %v \n\n", updateContact)
+				fmt.Println("-> Rentrez le nouveau nom")
+				inputNom, _ := reader.ReadString('\n')
+				inputNom = strings.TrimSpace(inputNom)
+				fmt.Println("-> Rentrez le nouveau prenom")
+				inputPrenom, _ := reader.ReadString('\n')
+				inputPrenom = strings.TrimSpace(inputPrenom)
+				fmt.Println("-> Rentrez le nouvel email")
+				inputMail, _ := reader.ReadString('\n')
+				inputMail = strings.TrimSpace(inputMail)
+				updateContact := contacts.Contact{
+					Nom:    inputNom,
+					Prenom: inputPrenom,
+					Email:  inputMail,
+				}
+				updateContact, error2 := contactManager.ModifierContact(uint(inputIdInt), updateContact)
+				if error2 != nil {
+					fmt.Printf("Une erreur est survenue: %v\n\n", error2)
+				} else {
+					fmt.Printf("Utilisateur modifié: %v \n\n", updateContact)
+				}
 			}
 		case "5":
 			fmt.Println("-> Quitter l'application")
