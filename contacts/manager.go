@@ -1,5 +1,7 @@
 package contacts
 
+import "fmt"
+
 type Manager struct {
 	list   map[uint]Contact
 	nextID uint
@@ -26,7 +28,13 @@ func (m *Manager) SupprimerContact() {
 
 }
 
-func (m *Manager) ModifierContact() {
+func (m *Manager) ModifierContact(c Contact) (Contact, error) {
+	id := c.ID
+	fmt.Printf("Id : %v", id)
+
+	m.list[id] = c
+
+	return c, nil
 
 }
 
