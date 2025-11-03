@@ -27,8 +27,14 @@ func (m *Manager) AjouterContact(c Contact) (Contact, error) {
 	return c, nil
 }
 
-func (m *Manager) SupprimerContact() {
+func (m *Manager) SupprimerContact(id uint) error {
+	if _, ok := m.list[id]; !ok {
+		return fmt.Errorf("le contact avec l'ID %d n'existe pas", id)
+	}
 
+	delete(m.list, id)
+
+	return nil
 }
 
 func (m *Manager) ModifierContact(id uint, c Contact) (Contact, error) {

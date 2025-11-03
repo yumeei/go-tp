@@ -65,6 +65,20 @@ func main() {
 			}
 		case "3":
 			fmt.Println("-> Supprimer un contact")
+			fmt.Println("-> Entrez l'ID du contact à supprimer :")
+			inputId, _ := reader.ReadString('\n')
+			inputId = strings.TrimSpace(inputId)
+			inputIdInt, err := strconv.ParseInt(inputId, 10, 64)
+			if err != nil {
+					fmt.Printf("Erreur dans la conversion de l'ID : %v", err)
+			} else {
+				err = contactManager.SupprimerContact(uint(inputIdInt))
+				if err != nil {
+						fmt.Printf("Une erreur est survenue : %v\n\n", err)
+				} else {
+						fmt.Println("Contact supprimé avec succès\n")
+				}
+			}
 		case "4":
 			fmt.Println("-> Mettre à jour un contact")
 			fmt.Println("-> Rentrez l'ID")
