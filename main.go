@@ -41,7 +41,6 @@ func main() {
 			inputMail = strings.TrimSpace(inputMail)
 
 			addContact := contacts.Contact{
-				ID:     0,
 				Nom:    inputNom,
 				Prenom: inputPrenom,
 				Email:  inputMail,
@@ -51,19 +50,6 @@ func main() {
 				fmt.Printf("Une erreur est survenue: %v\n\n", error)
 			} else {
 				fmt.Printf("Utilisateur ajouté: %v \n\n", addContact)
-			}
-
-			updateContact := contacts.Contact{
-				ID:     0,
-				Nom:    "test",
-				Prenom: "test",
-				Email:  "test",
-			}
-			updateContact, error2 := contactManager.ModifierContact(updateContact)
-			if error != nil {
-				fmt.Printf("Une erreur est survenue: %v\n\n", error2)
-			} else {
-				fmt.Printf("Utilisateur modifié: %v \n\n", updateContact)
 			}
 
 		case "2":
@@ -80,6 +66,17 @@ func main() {
 			fmt.Println("-> Supprimer un contact")
 		case "4":
 			fmt.Println("-> Mettre à jour un contact")
+			updateContact := contacts.Contact{
+				Nom:    "test",
+				Prenom: "test",
+				Email:  "test",
+			}
+			updateContact, error2 := contactManager.ModifierContact(0, updateContact)
+			if error2 != nil {
+				fmt.Printf("Une erreur est survenue: %v\n\n", error2)
+			} else {
+				fmt.Printf("Utilisateur modifié: %v \n\n", updateContact)
+			}
 		case "5":
 			fmt.Println("-> Quitter l'application")
 			os.Exit(0)
