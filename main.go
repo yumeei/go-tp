@@ -46,13 +46,11 @@ func main() {
 				fmt.Printf("Erreur de validation: %v\n\n", err)
 				break
 			}
-
-			// 2. AJOUT au Manager (La variable err est réutilisée)
-			addedContact, err = contactManager.AjouterContact(addedContact) // NOTE: on utilise "="
+			addedContactValue, err := contactManager.AjouterContact(*addedContact)
 			if err != nil {
 				fmt.Printf("Erreur d'ajout au manager: %v\n\n", err)
 			} else {
-				fmt.Printf("Utilisateur ajouté: %v \n\n", addedContact)
+				fmt.Printf("Utilisateur ajouté: %v \n\n", addedContactValue)
 			}
 
 		case "2":
@@ -78,7 +76,7 @@ func main() {
 				if err != nil {
 					fmt.Printf("Une erreur est survenue : %v\n\n", err)
 				} else {
-					fmt.Println("Contact supprimé avec succès\n")
+					fmt.Println("Contact supprimé avec succès")
 				}
 			}
 		case "4":
@@ -105,11 +103,11 @@ func main() {
 				fmt.Printf("Erreur à la création du contact: %v", err)
 				break
 			}
-			updateContact, err = contactManager.ModifierContact(uint(inputIdInt), updateContact)
+			updateContactValue, err := contactManager.ModifierContact(uint(inputIdInt), *updateContact)
 			if err != nil {
 				fmt.Printf("Une erreur est survenue: %v\n\n", err)
 			} else {
-				fmt.Printf("Utilisateur modifié: %v \n\n", updateContact)
+				fmt.Printf("Utilisateur modifié: %v \n\n", updateContactValue)
 			}
 		case "5":
 			fmt.Println("-> Quitter l'application")

@@ -8,11 +8,11 @@ type Contact struct {
 	Email  string
 }
 
-func NewContact(nom string, prenom string, email string) (Contact, error) {
+func NewContact(nom string, prenom string, email string) (*Contact, error) {
 	if nom == "" || prenom == "" || email == "" {
-		return Contact{}, fmt.Errorf("Tous les champs doivent être remplis")
+		return nil, fmt.Errorf("Tous les champs doivent être remplis")
 	}
-	return Contact{
+	return &Contact{
 		Nom:    nom,
 		Prenom: prenom,
 		Email:  email,

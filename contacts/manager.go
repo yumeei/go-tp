@@ -1,7 +1,6 @@
 package contacts
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -43,7 +42,7 @@ func (m *Manager) ModifierContact(id uint, c Contact) (Contact, error) {
 	_, exists := m.list[id]
 
 	if !exists {
-		return Contact{}, errors.New(fmt.Sprintf("Contact avec ID %d non trouvé", id))
+		return Contact{}, fmt.Errorf("Contact avec ID %d non trouvé", id)
 	}
 
 	m.list[id] = c
