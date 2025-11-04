@@ -41,16 +41,18 @@ func main() {
 			inputMail, _ := reader.ReadString('\n')
 			inputMail = strings.TrimSpace(inputMail)
 
-			addContact := contacts.Contact{
-				Nom:    inputNom,
-				Prenom: inputPrenom,
-				Email:  inputMail,
+			addedContact, err := contacts.NewContact(inputNom, inputPrenom, inputMail)
+			if err != nil {
+				fmt.Printf("Erreur de validation: %v\n\n", err)
+				break
 			}
-			addContact, error := contactManager.AjouterContact(addContact)
-			if error != nil {
-				fmt.Printf("Une erreur est survenue: %v\n\n", error)
+
+			// 2. AJOUT au Manager (La variable err est réutilisée)
+			addedContact, err = contactManager.AjouterContact(addedContact) // NOTE: on utilise "="
+			if err != nil {
+				fmt.Printf("Erreur d'ajout au manager: %v\n\n", err)
 			} else {
-				fmt.Printf("Utilisateur ajouté: %v \n\n", addContact)
+				fmt.Printf("Utilisateur ajouté: %v \n\n", addedContact)
 			}
 
 		case "2":
@@ -70,13 +72,13 @@ func main() {
 			inputId = strings.TrimSpace(inputId)
 			inputIdInt, err := strconv.ParseInt(inputId, 10, 64)
 			if err != nil {
-					fmt.Printf("Erreur dans la conversion de l'ID : %v", err)
+				fmt.Printf("Erreur dans la conversion de l'ID : %v", err)
 			} else {
 				err = contactManager.SupprimerContact(uint(inputIdInt))
 				if err != nil {
-						fmt.Printf("Une erreur est survenue : %v\n\n", err)
+					fmt.Printf("Une erreur est survenue : %v\n\n", err)
 				} else {
-						fmt.Println("Contact supprimé avec succès\n")
+					fmt.Println("Contact supprimé avec succès\n")
 				}
 			}
 		case "4":
@@ -87,27 +89,27 @@ func main() {
 			inputIdInt, err := strconv.ParseInt(inputId, 10, 64)
 			if err != nil {
 				fmt.Printf("Erreur dans la conversion de l'ID %v", err)
+				break
+			}
+			fmt.Println("-> Rentrez le nouveau nom")
+			inputNom, _ := reader.ReadString('\n')
+			inputNom = strings.TrimSpace(inputNom)
+			fmt.Println("-> Rentrez le nouveau prenom")
+			inputPrenom, _ := reader.ReadString('\n')
+			inputPrenom = strings.TrimSpace(inputPrenom)
+			fmt.Println("-> Rentrez le nouvel email")
+			inputMail, _ := reader.ReadString('\n')
+			inputMail = strings.TrimSpace(inputMail)
+			updateContact, err := contacts.NewContact(inputNom, inputPrenom, inputMail)
+			if err != nil {
+				fmt.Printf("Erreur à la création du contact: %v", err)
+				break
+			}
+			updateContact, err = contactManager.ModifierContact(uint(inputIdInt), updateContact)
+			if err != nil {
+				fmt.Printf("Une erreur est survenue: %v\n\n", err)
 			} else {
-				fmt.Println("-> Rentrez le nouveau nom")
-				inputNom, _ := reader.ReadString('\n')
-				inputNom = strings.TrimSpace(inputNom)
-				fmt.Println("-> Rentrez le nouveau prenom")
-				inputPrenom, _ := reader.ReadString('\n')
-				inputPrenom = strings.TrimSpace(inputPrenom)
-				fmt.Println("-> Rentrez le nouvel email")
-				inputMail, _ := reader.ReadString('\n')
-				inputMail = strings.TrimSpace(inputMail)
-				updateContact := contacts.Contact{
-					Nom:    inputNom,
-					Prenom: inputPrenom,
-					Email:  inputMail,
-				}
-				updateContact, error2 := contactManager.ModifierContact(uint(inputIdInt), updateContact)
-				if error2 != nil {
-					fmt.Printf("Une erreur est survenue: %v\n\n", error2)
-				} else {
-					fmt.Printf("Utilisateur modifié: %v \n\n", updateContact)
-				}
+				fmt.Printf("Utilisateur modifié: %v \n\n", updateContact)
 			}
 		case "5":
 			fmt.Println("-> Quitter l'application")
