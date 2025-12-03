@@ -2,21 +2,23 @@ package storage
 
 import (
 	"fmt"
+
+	"github.com/yumeei/go-tp/contacts"
 )
 
 type Store struct {
-	list   map[uint]*Contact
+	list   map[uint]contacts.Contact
 	nextID uint
 }
 
 func NewMemoryStorage() *Store {
 	return &Store{
-		list:   make(map[uint]*Contact),
+		list:   make(map[uint]contacts.Contact),
 		nextID: 0,
 	}
 }
 
-func (m *Store) AjouterContact(c *Contact) (*Contact, error) {
+func (m *Store) AjouterContact(c contacts.Contact) (contacts.Contact, error) {
 	id := m.nextID
 
 	m.list[id] = c
@@ -36,22 +38,22 @@ func (m *Store) SupprimerContact(id uint) error {
 	return nil
 }
 
-func (m *Store) ModifierContact(id uint, c *Contact) error {
+func (m *Store) ModifierContact(id uint, c contacts.Contact) (contacts.Contact, error) {
 	fmt.Printf("Tentative de modification Id : %v\n", id)
 
 	_, exists := m.list[id]
 
 	if !exists {
-		return fmt.Errorf("Contact avec ID %d non trouvé", id)
+		return contacts.Contact{}, fmt.Errorf("contact avec ID %d non trouvé", id)
 	}
 
 	m.list[id] = c
-	return nil
+	return c, nil
 
 }
 
-func (m *Store) GetContactsList() []*Contact {
-	var contactList []*Contact
+func (m *Store) GetContactsList() []contacts.Contact {
+	var contactList []contacts.Contact
 
 	for _, contact := range m.list {
 		contactList = append(contactList, contact)
@@ -60,11 +62,11 @@ func (m *Store) GetContactsList() []*Contact {
 	return contactList
 }
 
-func (m *Store) GetContactByID(id uint) (*Contact, error) {
+func (m *Store) GetContactByID(id uint) (contacts.Contact, error) {
 	_, exists := m.list[id]
 
 	if !exists {
-		return nil, fmt.Errorf("Contact avec ID %d non trouvé", id)
+		return contacts.Contact{}, fmt.Errorf("contact avec ID %d non trouvé", id)
 	}
 	return m.list[id], nil
 }

@@ -1,3 +1,5 @@
+package storage
+
 //struct des données
 //
 // Storer interface
