@@ -7,14 +7,14 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/yumeei/go-tp/contacts"
 	"github.com/yumeei/go-tp/internal/app"
 	"github.com/yumeei/go-tp/internal/storage"
 )
 
 var (
-	cfgFile string
-	store   contacts.Store
+	cfgFile    string
+	store      storage.Storer
+	sqlitePath string
 )
 
 var rootCmd = &cobra.Command{
@@ -37,6 +37,16 @@ var rootCmd = &cobra.Command{
 		case "memory":
 			store = storage.NewMemoryStorage()
 			fmt.Println("Utilisation du stockage en mémoire.")
+		case "gorm":
+			if sqlitePath != "" {
+				store, err = storage.NewGORMStore(sqlitePath)
+				if err != nil {
+					log.Printf("Erreur à l'ouverture de la base SQLite (%s): %v. Utilisation du stockage en mémoire.", sqlitePath, err)
+					store = storage.NewMemoryStorage()
+				}
+			} else {
+				store = storage.NewMemoryStorage()
+			}
 		default:
 			log.Fatalf("Type de stockage non supporté dans la configuration : %s", storageType)
 		}
@@ -48,7 +58,7 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
 }
@@ -90,4 +100,5 @@ func initConfig() {
 			log.Fatalf("Erreur de lecture du fichier de configuration: %s \n", err)
 		}
 	}
+	rootCmd.PersistentFlags().StringVarP(&sqlitePath, "db", "d", "contacts.db", "Chemin vers la base SQLite (par défaut contacts.db). Si vide, utilise le stockage en mémoire.")
 }

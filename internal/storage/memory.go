@@ -2,71 +2,83 @@ package storage
 
 import (
 	"fmt"
-
-	"github.com/yumeei/go-tp/contacts"
+	"sync"
 )
 
+// Store is an in-memory implementation of the Storer interface.
 type Store struct {
-	list   map[uint]contacts.Contact
+	mu     sync.RWMutex
+	list   map[uint]Contact
 	nextID uint
 }
 
 func NewMemoryStorage() *Store {
 	return &Store{
-		list:   make(map[uint]contacts.Contact),
-		nextID: 0,
+		list:   make(map[uint]Contact),
+		nextID: 1,
 	}
 }
 
-func (m *Store) AjouterContact(c contacts.Contact) (contacts.Contact, error) {
-	id := m.nextID
+// AjouterContact ajoute un nouveau contact et retourne le contact créé.
+func (m *Store) AjouterContact(c *Contact) (*Contact, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 
-	m.list[id] = c
-
+	c.ID = m.nextID
+	m.list[c.ID] = *c
 	m.nextID++
 
 	return c, nil
 }
 
+// SupprimerContact supprime un contact par son ID.
 func (m *Store) SupprimerContact(id uint) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
 	if _, ok := m.list[id]; !ok {
 		return fmt.Errorf("le contact avec l'ID %d n'existe pas", id)
 	}
 
 	delete(m.list, id)
-
 	return nil
 }
 
-func (m *Store) ModifierContact(id uint, c contacts.Contact) (contacts.Contact, error) {
-	fmt.Printf("Tentative de modification Id : %v\n", id)
+// ModifierContact met à jour un contact existant.
+func (m *Store) ModifierContact(id uint, c *Contact) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 
-	_, exists := m.list[id]
-
-	if !exists {
-		return contacts.Contact{}, fmt.Errorf("contact avec ID %d non trouvé", id)
+	if _, exists := m.list[id]; !exists {
+		return fmt.Errorf("contact avec ID %d non trouvé", id)
 	}
 
-	m.list[id] = c
-	return c, nil
-
+	c.ID = id
+	m.list[id] = *c
+	return nil
 }
 
-func (m *Store) GetContactsList() []contacts.Contact {
-	var contactList []contacts.Contact
+// GetContactsList retourne la liste des contacts sous forme de slice de pointeurs.
+func (m *Store) GetContactsList() []*Contact {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 
+	var contactList []*Contact
 	for _, contact := range m.list {
-		contactList = append(contactList, contact)
+		c := contact
+		contactList = append(contactList, &c)
 	}
-
 	return contactList
 }
 
-func (m *Store) GetContactByID(id uint) (contacts.Contact, error) {
-	_, exists := m.list[id]
+// GetContactByID retourne un contact par son ID.
+func (m *Store) GetContactByID(id uint) (*Contact, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 
+	contact, exists := m.list[id]
 	if !exists {
-		return contacts.Contact{}, fmt.Errorf("contact avec ID %d non trouvé", id)
+		return nil, fmt.Errorf("contact avec ID %d non trouvé", id)
 	}
-	return m.list[id], nil
+	return &contact, nil
 }

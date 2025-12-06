@@ -6,35 +6,34 @@ import (
 	"io"
 	"os"
 	"sync"
-
-	"github.com/yumeei/go-tp/contacts"
 )
 
 // JSONStore implémente l'interface Store pour la persistance des données dans un fichier JSON.
 type JSONStore struct {
 	mu     sync.Mutex
 	path   string
-	list   map[uint]contacts.Contact
+	list   map[uint]Contact
 	nextID uint
 }
 
-// GetContactByID implements contacts.Store.
-func (s *JSONStore) GetContactByID(id uint) (contacts.Contact, error) {
+// GetContactByID implements Storer.
+func (s *JSONStore) GetContactByID(id uint) (*Contact, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	contact, ok := s.list[id]
 	if !ok {
-		return contacts.Contact{}, fmt.Errorf("le contact avec l'ID %d n'existe pas", id)
+		return nil, fmt.Errorf("le contact avec l'ID %d n'existe pas", id)
 	}
-	return contact, nil
+	c := contact
+	return &c, nil
 }
 
 // NewJSONStore crée une nouvelle instance de JSONStore.
 func NewJSONStore(path string) (*JSONStore, error) {
 	store := &JSONStore{
 		path:   path,
-		list:   make(map[uint]contacts.Contact),
+		list:   make(map[uint]Contact),
 		nextID: 1, // On commence à 1
 	}
 
@@ -92,12 +91,12 @@ func (s *JSONStore) save() error {
 }
 
 // AjouterContact ajoute un nouveau contact et sauvegarde.
-func (s *JSONStore) AjouterContact(c contacts.Contact) (contacts.Contact, error) {
+func (s *JSONStore) AjouterContact(c *Contact) (*Contact, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	c.ID = s.nextID
-	s.list[c.ID] = c
+	s.list[c.ID] = *c
 	s.nextID++
 
 	return c, s.save()
@@ -117,27 +116,28 @@ func (s *JSONStore) SupprimerContact(id uint) error {
 }
 
 // ModifierContact modifie un contact existant et sauvegarde.
-func (s *JSONStore) ModifierContact(id uint, c contacts.Contact) (contacts.Contact, error) {
+func (s *JSONStore) ModifierContact(id uint, c *Contact) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	if _, ok := s.list[id]; !ok {
-		return contacts.Contact{}, fmt.Errorf("contact avec ID %d non trouvé", id)
+		return fmt.Errorf("contact avec ID %d non trouvé", id)
 	}
 
 	c.ID = id // Assure que l'ID est conservé
-	s.list[id] = c
-	return c, s.save()
+	s.list[id] = *c
+	return s.save()
 }
 
-// GetContactsList retourne la liste de tous les contacts.
-func (s *JSONStore) GetContactsList() []contacts.Contact {
+// GetContactsList retourne la liste de tous les contacts
+func (s *JSONStore) GetContactsList() []*Contact {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	var contactList []contacts.Contact
+	var contactList []*Contact
 	for _, contact := range s.list {
-		contactList = append(contactList, contact)
+		c := contact
+		contactList = append(contactList, &c)
 	}
 	return contactList
 }

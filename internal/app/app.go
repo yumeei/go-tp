@@ -7,10 +7,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yumeei/go-tp/contacts"
+	"github.com/yumeei/go-tp/internal/storage"
 )
 
-func Run(store contacts.Store) {
+// Run démarre l'application en acceptant n'importe quelle implémentation de storage.Storer.
+func Run(store storage.Storer) {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
@@ -47,7 +48,7 @@ func Run(store contacts.Store) {
 	}
 }
 
-func handleAddContact(reader *bufio.Reader, store contacts.Store) {
+func handleAddContact(reader *bufio.Reader, store storage.Storer) {
 	fmt.Println("-> Ajouter un contact")
 	fmt.Println("-> Rentrez le nom")
 	inputNom, _ := reader.ReadString('\n')
@@ -59,12 +60,12 @@ func handleAddContact(reader *bufio.Reader, store contacts.Store) {
 	inputMail, _ := reader.ReadString('\n')
 	inputMail = strings.TrimSpace(inputMail)
 
-	newContact, err := contacts.NewContact(inputNom, inputPrenom, inputMail)
+	newContact, err := storage.NewContact(inputNom, inputPrenom, inputMail)
 	if err != nil {
 		fmt.Printf("Erreur de validation: %v\n\n", err)
 		return
 	}
-	addedContact, err := store.AjouterContact(*newContact)
+	addedContact, err := store.AjouterContact(newContact)
 	if err != nil {
 		fmt.Printf("Erreur d'ajout au manager: %v\n\n", err)
 	} else {
@@ -72,19 +73,19 @@ func handleAddContact(reader *bufio.Reader, store contacts.Store) {
 	}
 }
 
-func handleListContacts(store contacts.Store) {
+func handleListContacts(store storage.Storer) {
 	fmt.Println("-> Lister tous les contacts")
 	contactList := store.GetContactsList()
-	if len(contactList) == 0 {
-		fmt.Println("Pas de contact enregistrés")
-	} else {
+	if len(contactList) != 0 {
 		for _, contact := range contactList {
-			fmt.Printf("ID %d : %s %s, %s\n", contact.ID, contact.Prenom, contact.Nom, contact.Email)
+			fmt.Printf("Utilisateur n° %v : %v, %v, %v \n\n", contact.ID, contact.Prenom, contact.Nom, contact.Email)
 		}
+	} else {
+		fmt.Println("Pas de contact enregistrés")
 	}
 }
 
-func handleDeleteContact(reader *bufio.Reader, store contacts.Store) {
+func handleDeleteContact(reader *bufio.Reader, store storage.Storer) {
 	fmt.Println("-> Supprimer un contact")
 	fmt.Println("-> Entrez l'ID du contact à supprimer :")
 	inputId, _ := reader.ReadString('\n')
@@ -103,7 +104,7 @@ func handleDeleteContact(reader *bufio.Reader, store contacts.Store) {
 	}
 }
 
-func handleUpdateContact(reader *bufio.Reader, store contacts.Store) {
+func handleUpdateContact(reader *bufio.Reader, store storage.Storer) {
 	fmt.Println("-> Mettre à jour un contact")
 	fmt.Println("-> Rentrez l'ID")
 	inputId, _ := reader.ReadString('\n')
@@ -123,21 +124,26 @@ func handleUpdateContact(reader *bufio.Reader, store contacts.Store) {
 	inputMail, _ := reader.ReadString('\n')
 	inputMail = strings.TrimSpace(inputMail)
 
-	contactToUpdate := contacts.Contact{
+	contactToUpdate := &storage.Contact{
 		Nom:    inputNom,
 		Prenom: inputPrenom,
 		Email:  inputMail,
 	}
 
-	updatedContact, err := store.ModifierContact(uint(inputIdInt), contactToUpdate)
-	if err != nil {
+	// ModifierContact ne renvoie plus le contact, on vérifie l'erreur puis on récupère l'entité mise à jour.
+	if err := store.ModifierContact(uint(inputIdInt), contactToUpdate); err != nil {
 		fmt.Printf("Une erreur est survenue lors de la modification: %v\n\n", err)
 	} else {
+		updatedContact, err := store.GetContactByID(uint(inputIdInt))
+		if err != nil {
+			fmt.Printf("Modification effectuée mais impossible de récupérer le contact: %v\n\n", err)
+			return
+		}
 		fmt.Printf("Utilisateur modifié : ID %d, %s %s, %s\n\n", updatedContact.ID, updatedContact.Prenom, updatedContact.Nom, updatedContact.Email)
 	}
 }
 
-func handleFindByID(reader *bufio.Reader, store contacts.Store) {
+func handleFindByID(reader *bufio.Reader, store storage.Storer) {
 	fmt.Println("-> Chercher par ID")
 	fmt.Println("-> Rentrez l'ID")
 	inputId, _ := reader.ReadString('\n')
