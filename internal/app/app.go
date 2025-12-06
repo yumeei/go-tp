@@ -10,7 +10,7 @@ import (
 	"github.com/yumeei/go-tp/internal/storage"
 )
 
-func Run(store storage.Store) {
+func Run(store storage.Storer) {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
@@ -28,13 +28,13 @@ func Run(store storage.Store) {
 
 		switch input {
 		case "1":
-			handleAddContact(reader, &store)
+			handleAddContact(reader, store)
 		case "2":
 			handleListContacts(store)
 		case "3":
-			handleDeleteContact(reader, &store)
+			handleDeleteContact(reader, store)
 		case "4":
-			handleUpdateContact(reader, &store)
+			handleUpdateContact(reader, store)
 		case "5":
 			handleFindByID(reader, store)
 		case "6":
@@ -47,7 +47,7 @@ func Run(store storage.Store) {
 	}
 }
 
-func handleAddContact(reader *bufio.Reader, store *storage.Store) {
+func handleAddContact(reader *bufio.Reader, store storage.Storer) {
 	fmt.Println("-> Ajouter un contact")
 	fmt.Println("-> Rentrez le nom")
 	inputNom, _ := reader.ReadString('\n')
@@ -72,19 +72,19 @@ func handleAddContact(reader *bufio.Reader, store *storage.Store) {
 	}
 }
 
-func handleListContacts(store storage.Store) {
+func handleListContacts(store storage.Storer) {
 	fmt.Println("-> Lister tous les contacts")
 	contactList := store.GetContactsList()
 	if len(contactList) != 0 {
-		for i := 0; i < len(contactList); i++ {
-			fmt.Printf("Utilisateur n° %v : %v, %v, %v \n\n", i, contactList[i].Prenom, contactList[i].Nom, contactList[i].Email)
+		for i, contact := range contactList {
+			fmt.Printf("Utilisateur n° %v : %v, %v, %v \n\n", i, contact.Prenom, contact.Nom, contact.Email)
 		}
 	} else {
 		fmt.Println("Pas de contact enregistrés")
 	}
 }
 
-func handleDeleteContact(reader *bufio.Reader, store *storage.Store) {
+func handleDeleteContact(reader *bufio.Reader, store storage.Storer) {
 	fmt.Println("-> Supprimer un contact")
 	fmt.Println("-> Entrez l'ID du contact à supprimer :")
 	inputId, _ := reader.ReadString('\n')
@@ -103,7 +103,7 @@ func handleDeleteContact(reader *bufio.Reader, store *storage.Store) {
 	}
 }
 
-func handleUpdateContact(reader *bufio.Reader, store *storage.Store) {
+func handleUpdateContact(reader *bufio.Reader, store storage.Storer) {
 	fmt.Println("-> Mettre à jour un contact")
 	fmt.Println("-> Rentrez l'ID")
 	inputId, _ := reader.ReadString('\n')
@@ -135,7 +135,7 @@ func handleUpdateContact(reader *bufio.Reader, store *storage.Store) {
 	}
 }
 
-func handleFindByID(reader *bufio.Reader, store storage.Store) {
+func handleFindByID(reader *bufio.Reader, store storage.Storer) {
 	fmt.Println("-> Chercher par ID")
 	fmt.Println("-> Rentrez l'ID")
 	inputId, _ := reader.ReadString('\n')

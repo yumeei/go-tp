@@ -12,12 +12,14 @@ type Store struct {
 func NewMemoryStorage() *Store {
 	return &Store{
 		list:   make(map[uint]*Contact),
-		nextID: 0,
+		nextID: 1,
 	}
 }
 
 func (m *Store) AjouterContact(c *Contact) (*Contact, error) {
 	id := m.nextID
+
+	c.ID = id
 
 	m.list[id] = c
 
